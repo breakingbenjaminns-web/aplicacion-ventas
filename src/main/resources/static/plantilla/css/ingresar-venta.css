@@ -1,0 +1,15 @@
+.venta-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 1.5rem;
+}
+
+.venta-layout .card {
+    min-width: 0;
+}
+
+@media (max-width: 991.98px) {
+    .venta-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

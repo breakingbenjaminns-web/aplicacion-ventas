@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Caja de eventos</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/caja.css">
+    <script src="/js/caja.js" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="container-lg d-flex align-items-center justify-content-between gap-3">
+            <a class="brand" href="/">Caja <span>de eventos</span></a>
+            <span class="session-status"><span class="status-dot" aria-hidden="true"></span>Sesión iniciada</span>
+        </div>
+    </header>
+    <main class="container-lg main-content">
+        <div class="section-label">INICIO</div>
+        <div class="heading-row">
+            <div>
+                <h1>Caja de eventos</h1>
+                <p class="subtitle">Panel principal</p>
+            </div>
+            <time id="fecha-actual" class="date" aria-label="Fecha actual"></time>
+        </div>
+        <div class="divider"></div>
+        <section class="welcome" aria-labelledby="bienvenida">
+            <span class="welcome-mark" aria-hidden="true">01</span>
+            <div>
+                <p class="eyebrow">CAJA</p>
+                <h2 id="bienvenida">Bienvenido</h2>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

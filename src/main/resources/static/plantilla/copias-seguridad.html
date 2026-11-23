@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Copias de seguridad - Caja</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <script src="js/menu-lateral.js"></script>
+        <noscript>El menú lateral requiere JavaScript.</noscript>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <script src="js/eventos-sesion.js"></script>
+                <script src="js/barra-superior.js"></script>
+                <noscript>La barra de usuario requiere JavaScript.</noscript>
+
+                <div class="container-fluid">
+                    <h1 class="h3 mb-2 text-gray-800">Copias de seguridad</h1>
+                    <p class="mb-4">Guardá una copia de la base de datos o restaurá una copia anterior.</p>
+                    <div class="alert alert-warning" role="note">
+                        <strong>Demostración:</strong> esta página todavía no crea, verifica ni restaura archivos.
+                        Los controles están desactivados.
+                    </div>
+                    <p>Una copia incluirá los datos que estén guardados en la base de datos. Los eventos, productos,
+                        tickets y movimientos de ejemplo de estas pantallas no están guardados allí y no se incluirán.</p>
+
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <section class="card shadow h-100" aria-labelledby="titulo-crear">
+                                <div class="card-header py-3">
+                                    <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-crear">Crear copia de seguridad</h2>
+                                </div>
+                                <div class="card-body">
+                                    <p>La copia permitirá conservar la información de la base de datos en un archivo para guardarlo en otro dispositivo.</p>
+                                    <p class="small text-muted">Ejemplo de nombre: <code>caja-respaldo-2026-03-14.db</code></p>
+                                    <button type="button" class="btn btn-primary" disabled aria-describedby="ayuda-crear">
+                                        <i class="fas fa-download mr-1" aria-hidden="true"></i> Crear copia
+                                    </button>
+                                    <p id="ayuda-crear" class="small text-muted mt-2 mb-0">Disponible próximamente desde esta página.</p>
+                                </div>
+                            </section>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <section class="card shadow h-100" aria-labelledby="titulo-restaurar">
+                                <div class="card-header py-3">
+                                    <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-restaurar">Restaurar copia de seguridad</h2>
+                                </div>
+                                <div class="card-body">
+                                    <p>Permitirá seleccionar una copia anterior para recuperar los datos guardados en ella.</p>
+                                    <div class="form-group">
+                                        <label for="archivo-copia">Archivo de copia</label>
+                                        <input class="form-control-file" id="archivo-copia" type="file" accept=".db,.sqlite,.sqlite3"
+                                            disabled aria-describedby="ayuda-restaurar">
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary" disabled aria-describedby="ayuda-restaurar">
+                                        <i class="fas fa-upload mr-1" aria-hidden="true"></i> Restaurar copia
+                                    </button>
+                                    <p id="ayuda-restaurar" class="small text-muted mt-2 mb-0">La selección y restauración estarán disponibles próximamente.</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <section class="card shadow mb-4" aria-labelledby="titulo-recomendaciones">
+                        <div class="card-header py-3">
+                            <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-recomendaciones">Antes de restaurar</h2>
+                        </div>
+                        <div class="card-body">
+                            <p>Restaurar puede reemplazar datos actuales por los de la copia anterior. Para la futura función se prevé verificar el archivo,
+                                conservar una copia de la base actual y pedir confirmación antes de cualquier reemplazo.</p>
+                            <p class="mb-0">Guardá las copias en un lugar protegido y, si es posible, en otro dispositivo.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white"><div class="container my-auto"><div class="copyright text-center my-auto">
+                <span>Derechos de autor Nahuel Segura; BreakingNS 2026</span>
+            </div></div></footer>
+        </div>
+    </div>
+    <a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+</body>
+</html>

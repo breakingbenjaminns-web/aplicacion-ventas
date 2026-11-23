@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Resumen - Caja</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <script src="js/menu-lateral.js"></script>
+        <noscript>El menú lateral requiere JavaScript.</noscript>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <script src="js/eventos-sesion.js"></script>
+                <script src="js/barra-superior.js"></script>
+                <noscript>La barra de usuario requiere JavaScript.</noscript>
+
+                <div class="container-fluid">
+                    <h1 class="h3 mb-2 text-gray-800">Resumen</h1>
+                    <p class="mb-4">Vista general y accesos rápidos para el evento seleccionado.</p>
+                    <p class="small text-muted">Demostración: el evento y sus productos son de ejemplo y se conservan solo durante la sesión de esta pestaña.</p>
+                    <p id="error-resumen" class="text-danger" role="alert"></p>
+
+                    <section class="card shadow mb-4" aria-labelledby="titulo-evento-actual">
+                        <div class="card-header py-3">
+                            <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-evento-actual">Evento seleccionado</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6"><p><strong>Nombre:</strong> <span id="resumen-nombre">—</span></p></div>
+                                <div class="col-md-6"><p><strong>Fecha:</strong> <span id="resumen-fecha">—</span></p></div>
+                                <div class="col-md-6"><p><strong>Estado del evento:</strong> <span id="resumen-estado">—</span></p></div>
+                                <div class="col-md-6"><p><strong>Estado de la caja:</strong> <span id="resumen-caja">—</span></p></div>
+                                <div class="col-md-6"><p><strong>Categorías:</strong> <span id="resumen-categorias">—</span></p></div>
+                                <div class="col-md-6"><p><strong>Productos de ejemplo:</strong> <span id="resumen-productos">—</span></p></div>
+                            </div>
+                            <a class="btn btn-outline-primary" href="eventos.html">Ver eventos</a>
+                            <a class="btn btn-outline-primary" href="caja.html">Ir a caja</a>
+                        </div>
+                    </section>
+
+                    <section aria-labelledby="titulo-accesos">
+                        <h2 class="h5 mb-3 text-gray-800" id="titulo-accesos">Accesos rápidos</h2>
+                        <div class="row">
+                            <div class="col-md-6 col-xl-4 mb-4">
+                                <div class="card shadow h-100"><div class="card-body">
+                                    <h3 class="h6 font-weight-bold text-primary">Productos</h3>
+                                    <p>Consultá y configurá los productos del evento.</p>
+                                    <a class="btn btn-sm btn-outline-primary" href="productos.html">Ver productos</a>
+                                </div></div>
+                            </div>
+                            <div class="col-md-6 col-xl-4 mb-4">
+                                <div class="card shadow h-100"><div class="card-body">
+                                    <h3 class="h6 font-weight-bold text-primary">Nueva venta</h3>
+                                    <p>Probá la carga de tickets de ejemplo.</p>
+                                    <a class="btn btn-sm btn-outline-primary" href="ingresar-venta.html">Ir a nueva venta</a>
+                                </div></div>
+                            </div>
+                            <div class="col-md-6 col-xl-4 mb-4">
+                                <div class="card shadow h-100"><div class="card-body">
+                                    <h3 class="h6 font-weight-bold text-primary">Resumen de ventas</h3>
+                                    <p>Consultá los importes y gráficos ilustrativos.</p>
+                                    <a class="btn btn-sm btn-outline-primary" href="resumen-ventas.html">Ver resumen de ventas</a>
+                                </div></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white"><div class="container my-auto"><div class="copyright text-center my-auto">
+                <span>Derechos de autor Nahuel Segura; BreakingNS 2026</span>
+            </div></div></footer>
+        </div>
+    </div>
+    <a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="js/resumen.js"></script>
+</body>
+</html>

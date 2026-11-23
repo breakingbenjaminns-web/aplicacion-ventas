@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Eventos - Caja</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <script src="js/menu-lateral.js"></script>
+        <noscript>El menú lateral requiere JavaScript.</noscript>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <script src="js/eventos-sesion.js"></script>
+                <script src="js/barra-superior.js"></script>
+                <noscript>La barra de usuario requiere JavaScript.</noscript>
+
+                <div class="container-fluid">
+                    <h1 class="h3 mb-2 text-gray-800">Eventos</h1>
+                    <p class="mb-4">Demostración: los eventos son ficticios y se guardan solo durante la sesión de esta pestaña.
+                        No se registran en la base de datos ni modifican las ventas de ejemplo.</p>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-formulario">Nuevo evento</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-evento">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="nombre-evento">Nombre del evento</label>
+                                        <input class="form-control" id="nombre-evento" maxlength="100" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="fecha-evento">Fecha del evento</label>
+                                        <input class="form-control" id="fecha-evento" type="date" required>
+                                    </div>
+                                </div>
+                                <fieldset class="form-group">
+                                    <legend class="col-form-label pt-0">Categorías de venta</legend>
+                                    <div class="custom-control custom-checkbox custom-control-inline">
+                                        <input class="custom-control-input" id="categoria-bebida" name="categoria" type="checkbox" value="Bebida">
+                                        <label class="custom-control-label" for="categoria-bebida">Bebida</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox custom-control-inline">
+                                        <input class="custom-control-input" id="categoria-comida" name="categoria" type="checkbox" value="Comida">
+                                        <label class="custom-control-label" for="categoria-comida">Comida</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox custom-control-inline">
+                                        <input class="custom-control-input" id="categoria-productos" name="categoria" type="checkbox" value="Productos">
+                                        <label class="custom-control-label" for="categoria-productos">Productos</label>
+                                    </div>
+                                </fieldset>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="estado-evento">Estado del evento</label>
+                                        <select class="form-control" id="estado-evento">
+                                            <option>Abierto</option>
+                                            <option>Cerrado</option>
+                                            <option>Cancelado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <span class="d-block">Estado de la caja</span>
+                                        <span id="estado-caja" class="d-block mt-2">Cerrada</span>
+                                        <small class="form-text text-muted">La apertura y el cierre se gestionan en Caja.</small>
+                                    </div>
+                                </div>
+                                <p id="error-evento" class="text-danger" role="alert"></p>
+                                <p id="mensaje-evento" class="text-success" role="status"></p>
+                                <button class="btn btn-primary" type="submit">Guardar evento</button>
+                                <button class="btn btn-outline-secondary" id="nuevo-evento" type="button">Nuevo evento</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h2 class="h6 m-0 font-weight-bold text-primary">Eventos de ejemplo</h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted">Seleccioná un evento para consultarlo o editarlo. Solo uno queda seleccionado a la vez; seleccionarlo no cambia su estado.</p>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" data-tipo-registros="eventos" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr><th>Nombre</th><th class="fecha-dmy">Fecha</th><th>Categorías</th><th>Estado</th><th>Caja</th><th>Selección</th></tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr><th>Nombre</th><th>Fecha</th><th>Categorías</th><th>Estado</th><th>Caja</th><th>Selección</th></tr>
+                                    </tfoot>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Derechos de autor Nahuel Segura; BreakingNS 2026</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/tabla-listado.js"></script>
+    <script src="js/eventos.js"></script>
+</body>
+</html>

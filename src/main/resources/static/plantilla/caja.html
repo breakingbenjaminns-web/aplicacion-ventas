@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Caja - Caja</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <script src="js/menu-lateral.js"></script>
+        <noscript>El menú lateral requiere JavaScript.</noscript>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <script src="js/eventos-sesion.js"></script>
+                <script src="js/barra-superior.js"></script>
+                <noscript>La barra de usuario requiere JavaScript.</noscript>
+
+                <div class="container-fluid">
+                    <h1 class="h3 mb-2 text-gray-800">Caja</h1>
+                    <p class="mb-4">Demostración: los movimientos y ventas son ficticios y duran la sesión de esta pestaña.
+                        No se guardan en la base de datos ni están vinculados a los tickets.</p>
+                    <p id="caja-evento" class="font-weight-bold"></p>
+                    <p id="error-caja" class="text-danger" role="alert"></p>
+                    <p id="mensaje-caja" class="text-success" role="status"></p>
+
+                    <section class="card shadow mb-4" aria-labelledby="titulo-resumen">
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-resumen">Resumen de caja</h2></div>
+                        <div class="card-body">
+                            <p><strong>Estado:</strong> <span id="estado-caja"></span></p>
+                            <p id="aviso-caja" class="text-warning"></p>
+                            <div class="row">
+                                <div class="col-md-4"><p>Aportes iniciales: <strong id="total-aportes">—</strong></p></div>
+                                <div class="col-md-4"><p>Ventas de ejemplo en efectivo: <strong id="ventas-efectivo">—</strong></p></div>
+                                <div class="col-md-4"><p>Ventas de ejemplo por transferencia: <strong id="ventas-transferencia">—</strong></p></div>
+                                <div class="col-md-4"><p>Deudas de ejemplo pendientes: <strong id="ventas-deuda">—</strong></p></div>
+                                <div class="col-md-4"><p>Base del período actual: <strong id="base-caja">—</strong></p></div>
+                                <div class="col-md-4"><p>Efectivo esperado: <strong id="efectivo-esperado">—</strong></p></div>
+                            </div>
+                            <p class="small text-muted">Las ventas ficticias se agregan solo al primer período de caja para ilustrar el cálculo; no representan ventas reales.</p>
+                            <div id="ultimo-cierre" hidden>
+                                <p>Último efectivo contado: <strong id="efectivo-contado"></strong> · Diferencia: <strong id="diferencia-cierre"></strong></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card shadow mb-4" id="seccion-apertura" aria-labelledby="titulo-apertura" hidden>
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-apertura">Abrir caja</h2></div>
+                        <div class="card-body">
+                            <form id="form-apertura">
+                                <p>Agregá los aportes iniciales de ejemplo y sus responsables. Sin aportes, la caja comienza en $ 0,00.</p>
+                                <div id="aportes-formulario"></div>
+                                <button class="btn btn-outline-primary mb-3" id="agregar-aporte" type="button">Agregar aporte</button>
+                                <div><button class="btn btn-primary" id="abrir-caja" type="submit">Abrir caja</button></div>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="card shadow mb-4" id="seccion-cierre" aria-labelledby="titulo-cierre" hidden>
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-cierre">Cerrar caja</h2></div>
+                        <div class="card-body">
+                            <form id="form-cierre">
+                                <div class="form-group">
+                                    <label for="contado">Efectivo contado</label>
+                                    <input class="form-control" id="contado" type="text" inputmode="decimal" required
+                                        aria-describedby="ayuda-contado" placeholder="Ej.: 80000,00">
+                                    <small id="ayuda-contado" class="form-text text-muted">Hasta dos decimales, sin separadores de miles.</small>
+                                </div>
+                                <button class="btn btn-primary" type="submit">Cerrar caja</button>
+                            </form>
+                        </div>
+                    </section>
+
+                    <section class="card shadow mb-4" id="seccion-reapertura" aria-labelledby="titulo-reapertura" hidden>
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-reapertura">Reabrir caja</h2></div>
+                        <div class="card-body">
+                            <p>La reapertura usará como base el efectivo contado en el último cierre.</p>
+                            <button class="btn btn-primary" id="reabrir-caja" type="button">Reabrir caja</button>
+                        </div>
+                    </section>
+
+                    <section class="card shadow mb-4" aria-labelledby="titulo-aportes">
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-aportes">Aportes iniciales</h2></div>
+                        <div class="card-body">
+                            <div class="table-responsive"><table class="table table-bordered">
+                                <thead><tr><th>Responsable</th><th>Importe</th></tr></thead>
+                                <tbody id="lista-aportes"></tbody>
+                            </table></div>
+                        </div>
+                    </section>
+
+                    <section class="card shadow mb-4" aria-labelledby="titulo-historial">
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-historial">Historial de ejemplo</h2></div>
+                        <div class="card-body">
+                            <div class="table-responsive"><table class="table table-bordered">
+                                <thead><tr><th>Fecha y hora</th><th>Acción</th><th>Detalle</th></tr></thead>
+                                <tbody id="historial-caja"></tbody>
+                            </table></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white"><div class="container my-auto"><div class="copyright text-center my-auto">
+                <span>Derechos de autor Nahuel Segura; BreakingNS 2026</span>
+            </div></div></footer>
+        </div>
+    </div>
+    <a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="js/importes.js"></script>
+    <script src="js/caja.js"></script>
+</body>
+</html>
