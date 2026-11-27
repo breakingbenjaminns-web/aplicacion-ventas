@@ -14,14 +14,13 @@
         <noscript>El menú lateral requiere JavaScript.</noscript>
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-                <script src="js/eventos-sesion.js"></script>
                 <script src="js/barra-superior.js"></script>
                 <noscript>La barra de usuario requiere JavaScript.</noscript>
 
                 <div class="container-fluid">
                     <h1 class="h3 mb-2 text-gray-800">Caja</h1>
-                    <p class="mb-4">Demostración: los movimientos y ventas son ficticios y duran la sesión de esta pestaña.
-                        No se guardan en la base de datos ni están vinculados a los tickets.</p>
+                    <p class="mb-4">Las aperturas, cierres y reaperturas se guardan en la base de datos.
+                        Las ventas y los movimientos todavía no están vinculados a la caja.</p>
                     <p id="caja-evento" class="font-weight-bold"></p>
                     <p id="error-caja" class="text-danger" role="alert"></p>
                     <p id="mensaje-caja" class="text-success" role="status"></p>
@@ -33,13 +32,10 @@
                             <p id="aviso-caja" class="text-warning"></p>
                             <div class="row">
                                 <div class="col-md-4"><p>Aportes iniciales: <strong id="total-aportes">—</strong></p></div>
-                                <div class="col-md-4"><p>Ventas de ejemplo en efectivo: <strong id="ventas-efectivo">—</strong></p></div>
-                                <div class="col-md-4"><p>Ventas de ejemplo por transferencia: <strong id="ventas-transferencia">—</strong></p></div>
-                                <div class="col-md-4"><p>Deudas de ejemplo pendientes: <strong id="ventas-deuda">—</strong></p></div>
                                 <div class="col-md-4"><p>Base del período actual: <strong id="base-caja">—</strong></p></div>
                                 <div class="col-md-4"><p>Efectivo esperado: <strong id="efectivo-esperado">—</strong></p></div>
                             </div>
-                            <p class="small text-muted">Las ventas ficticias se agregan solo al primer período de caja para ilustrar el cálculo; no representan ventas reales.</p>
+                            <p class="small text-muted">El efectivo esperado refleja el saldo de caja registrado; aún no incluye ventas de ejemplo.</p>
                             <div id="ultimo-cierre" hidden>
                                 <p>Último efectivo contado: <strong id="efectivo-contado"></strong> · Diferencia: <strong id="diferencia-cierre"></strong></p>
                             </div>
@@ -50,7 +46,7 @@
                         <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-apertura">Abrir caja</h2></div>
                         <div class="card-body">
                             <form id="form-apertura">
-                                <p>Agregá los aportes iniciales de ejemplo y sus responsables. Sin aportes, la caja comienza en $ 0,00.</p>
+                                <p>Agregá los aportes iniciales y sus responsables. Sin aportes, la caja comienza en $ 0,00.</p>
                                 <div id="aportes-formulario"></div>
                                 <button class="btn btn-outline-primary mb-3" id="agregar-aporte" type="button">Agregar aporte</button>
                                 <div><button class="btn btn-primary" id="abrir-caja" type="submit">Abrir caja</button></div>
@@ -92,7 +88,7 @@
                     </section>
 
                     <section class="card shadow mb-4" aria-labelledby="titulo-historial">
-                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-historial">Historial de ejemplo</h2></div>
+                        <div class="card-header py-3"><h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-historial">Historial de caja</h2></div>
                         <div class="card-body">
                             <div class="table-responsive"><table class="table table-bordered">
                                 <thead><tr><th>Fecha y hora</th><th>Acción</th><th>Detalle</th></tr></thead>
@@ -113,6 +109,7 @@
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
     <script src="js/importes.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/caja.js"></script>
 </body>
 </html>

@@ -17,14 +17,12 @@
         <noscript>El menú lateral requiere JavaScript.</noscript>
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-                <script src="js/eventos-sesion.js"></script>
                 <script src="js/barra-superior.js"></script>
                 <noscript>La barra de usuario requiere JavaScript.</noscript>
 
                 <div class="container-fluid">
                     <h1 class="h3 mb-2 text-gray-800">Eventos</h1>
-                    <p class="mb-4">Demostración: los eventos son ficticios y se guardan solo durante la sesión de esta pestaña.
-                        No se registran en la base de datos ni modifican las ventas de ejemplo.</p>
+                    <p class="mb-4">Los eventos se guardan en la base de datos. La gestión de la caja se realiza desde la sección Caja.</p>
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
@@ -44,6 +42,7 @@
                                 </div>
                                 <fieldset class="form-group">
                                     <legend class="col-form-label pt-0">Categorías de venta</legend>
+                                    <div id="categorias-evento">
                                     <div class="custom-control custom-checkbox custom-control-inline">
                                         <input class="custom-control-input" id="categoria-bebida" name="categoria" type="checkbox" value="Bebida">
                                         <label class="custom-control-label" for="categoria-bebida">Bebida</label>
@@ -56,14 +55,21 @@
                                         <input class="custom-control-input" id="categoria-productos" name="categoria" type="checkbox" value="Productos">
                                         <label class="custom-control-label" for="categoria-productos">Productos</label>
                                     </div>
+                                    </div>
+                                    <div class="form-inline mt-2">
+                                        <label class="sr-only" for="nueva-categoria">Nombre de la nueva categoría</label>
+                                        <input class="form-control mr-2" id="nueva-categoria" maxlength="80" placeholder="Nueva categoría">
+                                        <button class="btn btn-outline-secondary" id="crear-categoria" type="button">Crear categoría</button>
+                                    </div>
                                 </fieldset>
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
                                         <label for="estado-evento">Estado del evento</label>
                                         <select class="form-control" id="estado-evento">
-                                            <option>Abierto</option>
-                                            <option>Cerrado</option>
-                                            <option>Cancelado</option>
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="activo" selected>Abierto</option>
+                                            <option value="cerrado">Cerrado</option>
+                                            <option value="cancelado">Cancelado</option>
                                         </select>
                                     </div>
                                     <div class="form-group col-md-6">
@@ -82,10 +88,10 @@
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h2 class="h6 m-0 font-weight-bold text-primary">Eventos de ejemplo</h2>
+                            <h2 class="h6 m-0 font-weight-bold text-primary">Eventos registrados</h2>
                         </div>
                         <div class="card-body">
-                            <p class="small text-muted">Seleccioná un evento para consultarlo o editarlo. Solo uno queda seleccionado a la vez; seleccionarlo no cambia su estado.</p>
+                            <p class="small text-muted">Seleccioná un evento para consultarlo o editarlo. La selección no cambia su estado.</p>
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" data-tipo-registros="eventos" width="100%" cellspacing="0">
                                     <thead>
@@ -119,6 +125,7 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/tabla-listado.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/eventos.js"></script>
 </body>
 </html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crear administrador - Caja</title>
+</head>
+<body>
+    <main>
+        <h1>Crear administrador</h1>
+        <p>Creá la única cuenta administradora en esta computadora. Guardá la contraseña en un lugar seguro.</p>
+        <p th:if="${error}" th:text="${error}" role="alert"></p>
+        <form method="post" action="/inicializar">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <p><label for="nombre">Usuario</label>
+                <input id="nombre" name="nombre" th:value="${nombre}" required minlength="3" maxlength="40"
+                    pattern="[A-Za-z0-9._\-]+" autocomplete="username"></p>
+            <p><label for="contrasena">Contraseña (mínimo 12 caracteres)</label>
+                <input id="contrasena" name="contrasena" type="password" required minlength="12"
+                    autocomplete="new-password"></p>
+            <p><label for="confirmacion">Repetir contraseña</label>
+                <input id="confirmacion" name="confirmacion" type="password" required minlength="12"
+                    autocomplete="new-password"></p>
+            <button type="submit">Crear administrador</button>
+        </form>
+    </main>
+</body>
+</html>

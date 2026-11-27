@@ -67,7 +67,7 @@ class CajaApplicationTests {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockUser(roles = "ADMIN")
 	void accesoAutenticadoYProteccionCsrf() throws Exception {
 		mockMvc.perform(get("/"))
 				.andExpect(status().is3xxRedirection())
@@ -83,7 +83,7 @@ class CajaApplicationTests {
 	}
 
 	@Test
-	@WithMockUser
+	@WithMockUser(roles = "ADMIN")
 	void recursosWebSeSirvenLocalmente() throws Exception {
 		mockMvc.perform(get("/plantilla/css/sb-admin-2.min.css")).andExpect(status().isOk());
 		mockMvc.perform(get("/plantilla/js/sb-admin-2.min.js")).andExpect(status().isOk());

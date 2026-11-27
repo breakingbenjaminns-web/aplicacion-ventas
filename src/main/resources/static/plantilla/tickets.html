@@ -25,7 +25,8 @@
 
                 <div class="container-fluid">
                     <h1 class="h3 mb-2 text-gray-800">Tickets</h1>
-                    <p class="mb-4">Listado de ejemplo. Los tickets todavía no están vinculados a las ventas reales.</p>
+                    <p class="mb-4" id="evento-tickets">Cargando evento...</p>
+                    <p class="text-danger" id="error-tickets" role="alert"></p>
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
@@ -39,9 +40,10 @@
                                             <th>Número</th>
                                             <th>Fecha</th>
                                             <th>Estado</th>
-                                            <th>Pago</th>
                                             <th>Medio de pago</th>
+                                            <th>Deudor</th>
                                             <th>Total</th>
+                                            <th>Anulación</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
@@ -49,38 +51,36 @@
                                             <th>Número</th>
                                             <th>Fecha</th>
                                             <th>Estado</th>
-                                            <th>Pago</th>
                                             <th>Medio de pago</th>
+                                            <th>Deudor</th>
                                             <th>Total</th>
+                                            <th>Anulación</th>
                                         </tr>
                                     </tfoot>
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td data-order="2026-01-10">10/01/2026</td>
-                                            <td>Confirmado</td>
-                                            <td>Pagado</td>
-                                            <td>Efectivo</td>
-                                            <td data-order="12500">$12.500</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td data-order="2026-01-10">10/01/2026</td>
-                                            <td>Confirmado</td>
-                                            <td>Pagado</td>
-                                            <td>Transferencia</td>
-                                            <td data-order="8300">$8.300</td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td data-order="2026-01-10">10/01/2026</td>
-                                            <td>Confirmado</td>
-                                            <td>Pendiente</td>
-                                            <td>Sin pago</td>
-                                            <td data-order="4500">$4.500</td>
-                                        </tr>
-                                    </tbody>
+                                    <tbody></tbody>
                                 </table>
+                            </div>
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h2 class="h6 m-0 font-weight-bold text-primary">Historial de inventario</h2>
+                                </div>
+                                <div class="card-body table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead><tr><th>Fecha (UTC)</th><th>Producto</th><th>Movimiento</th><th>Anterior</th><th>Nuevo</th><th>Ticket</th></tr></thead>
+                                        <tbody id="historial-inventario"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h2 class="h6 m-0 font-weight-bold text-primary">Movimientos de efectivo</h2>
+                                </div>
+                                <div class="card-body table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead><tr><th>Fecha (UTC)</th><th>Período</th><th>Ticket</th><th>Movimiento</th><th>Importe</th></tr></thead>
+                                        <tbody id="historial-caja"></tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -108,6 +108,9 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/tabla-listado.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/importes.js"></script>
+    <script src="js/tickets.js"></script>
 </body>
 
 </html>

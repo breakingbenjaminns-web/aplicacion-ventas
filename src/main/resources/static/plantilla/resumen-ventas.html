@@ -46,8 +46,10 @@
                         <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" disabled><i
                                 class="fas fa-download fa-sm text-white-50"></i> Generar informe (próximamente)</button>
                     </div>
-                    <p class="mb-4">Demostración: los importes y gráficos son ficticios, no corresponden al evento seleccionado
-                        ni están conectados a los tickets o a la caja. El gráfico de evolución usa datos ilustrativos independientes.</p>
+                    <p id="evento-resumen" class="mb-2">Cargando evento...</p>
+                    <p class="mb-4">Los importes corresponden a ventas confirmadas del evento, sin incluir tickets anulados.
+                        Los gráficos todavía muestran datos de ejemplo.</p>
+                    <p id="error-resumen-ventas" class="text-danger" role="alert"></p>
 
                     <!-- Content Row -->
                     <div class="row">
@@ -60,7 +62,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Total vendido (incluye deuda)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$ 605.000</div>
+                                            <div id="total-vendido" class="h5 mb-0 font-weight-bold text-gray-800">—</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -78,7 +80,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Ingresos en Efectivo</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$ 175.000</div>
+                                            <div id="total-efectivo" class="h5 mb-0 font-weight-bold text-gray-800">—</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -96,7 +98,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Ingresos en Transferencias</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$ 385.000</div>
+                                            <div id="total-transferencias" class="h5 mb-0 font-weight-bold text-gray-800">—</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -114,7 +116,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Adeudado</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$ 45.000</div>
+                                            <div id="total-deudas" class="h5 mb-0 font-weight-bold text-gray-800">—</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -152,7 +154,7 @@
                                 <!-- Card Header - Dropdown -->
                                 <div
                                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">Distribución por medio de pago y deuda</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Distribución por medio de pago y deuda (ejemplo)</h6>
                                 </div>
                                 <!-- Card Body -->
                                 <div class="card-body">
@@ -218,6 +220,9 @@
     <!-- Page level custom scripts -->
     <script src="js/demo/chart-area-demo.js"></script>
     <script src="js/demo/chart-pie-demo.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/importes.js"></script>
+    <script src="js/resumen-ventas.js"></script>
 
 </body>
 

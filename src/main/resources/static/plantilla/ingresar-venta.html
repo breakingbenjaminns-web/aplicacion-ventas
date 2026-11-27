@@ -42,8 +42,7 @@
 
                     <!-- Page Heading -->
                     <h1 class="h3 mb-2 text-gray-800">Nueva venta</h1>
-                    <p class="mb-4">Demostración: los productos, el stock y los tickets son ficticios.
-                        No se registran ventas ni pagos y los cambios se pierden al recargar la página.</p>
+                    <p class="mb-4" id="evento-venta">Cargando evento...</p>
 
                     <div class="venta-layout">
                         <section class="card shadow mb-4" aria-labelledby="titulo-ticket">
@@ -79,40 +78,35 @@
                                     <div class="form-group col-md-6">
                                         <label for="pago">Forma de pago</label>
                                         <select class="form-control" id="pago">
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Transferencia">Transferencia</option>
-                                            <option value="Deuda">Deuda</option>
+                                            <option value="efectivo">Efectivo</option>
+                                            <option value="transferencia">Transferencia</option>
+                                            <option value="deuda">Deuda</option>
                                         </select>
                                     </div>
                                     <div class="form-group col-md-6" id="grupo-deudor" hidden>
                                         <label for="deudor">Nombre del deudor</label>
                                         <input class="form-control" id="deudor" type="text" maxlength="100">
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="estado">Estado del ticket</label>
-                                        <select class="form-control" id="estado">
-                                            <option value="Abierto">Abierto</option>
-                                            <option value="En espera">En espera</option>
-                                            <option value="Cerrado">Cerrado</option>
-                                            <option value="Cancelado">Cancelado</option>
-                                        </select>
-                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="detalle">Detalle <span class="text-muted">(opcional)</span></label>
                                     <textarea class="form-control" id="detalle" rows="2" maxlength="500"></textarea>
                                 </div>
+                                <p id="anulacion-info" class="text-muted"></p>
                                 <p id="mensaje-venta" class="text-danger" role="alert"></p>
-                                <button class="btn btn-primary" id="nuevo-ticket" type="button">Guardar y nuevo ticket</button>
+                                <button class="btn btn-primary" id="guardar-ticket" type="button" disabled>Guardar ticket abierto</button>
+                                <button class="btn btn-success" id="confirmar-ticket" type="button" disabled>Confirmar venta</button>
+                                <button class="btn btn-outline-danger" id="anular-ticket" type="button" disabled>Anular ticket</button>
+                                <button class="btn btn-outline-secondary" id="nuevo-ticket" type="button" disabled>Nuevo ticket</button>
                             </div>
                         </section>
 
                         <aside class="card shadow mb-4" aria-labelledby="titulo-lista">
                             <div class="card-header py-3">
-                                <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-lista">Tickets de ejemplo</h2>
+                                <h2 class="h6 m-0 font-weight-bold text-primary" id="titulo-lista">Tickets del evento</h2>
                             </div>
                             <div class="card-body">
-                                <p class="small text-muted">Seleccioná un ticket para verlo o editarlo. Los cambios se guardan al elegir «Guardar y nuevo ticket».</p>
+                                <p class="small text-muted">Guardá el ticket antes de confirmar la venta. Los tickets guardados no se pueden editar.</p>
                                 <div id="lista-tickets" class="list-group"></div>
                             </div>
                         </aside>
@@ -155,6 +149,8 @@
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 
+    <script src="js/api.js"></script>
+    <script src="js/importes.js"></script>
     <script src="js/ingresar-venta.js"></script>
 
 </body>

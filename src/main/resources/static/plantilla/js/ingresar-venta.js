@@ -1,218 +1,281 @@
 (function () {
     "use strict";
 
-    const productos = [
-        { id: 1, nombre: "Gaseosa", precio: 250000, stock: 30 },
-        { id: 2, nombre: "Agua", precio: 150000, stock: 25 },
-        { id: 3, nombre: "Empanada", precio: 200000, stock: 40 },
-        { id: 4, nombre: "Choripán", precio: 450000, stock: 20 },
-        { id: 5, nombre: "Porción de torta", precio: 300000, stock: 15 }
-    ];
-    const tickets = [
-        { id: 1, items: [{ productoId: 1, cantidad: 2 }], pago: "Efectivo", deudor: "", detalle: "", estado: "Abierto" },
-        { id: 2, items: [{ productoId: 3, cantidad: 3 }], pago: "Transferencia", deudor: "", detalle: "", estado: "En espera" },
-        { id: 3, items: [{ productoId: 4, cantidad: 1 }], pago: "Deuda", deudor: "Persona A", detalle: "Ejemplo de fiado", estado: "Abierto" },
-        { id: 4, items: [{ productoId: 2, cantidad: 2 }], pago: "Efectivo", deudor: "", detalle: "", estado: "Cerrado" },
-        { id: 5, items: [{ productoId: 5, cantidad: 1 }], pago: "Transferencia", deudor: "", detalle: "", estado: "Cancelado" }
-    ];
-    const colores = { "Abierto": "badge-primary", "En espera": "badge-warning", "Cerrado": "badge-success", "Cancelado": "badge-secondary" };
-    const moneda = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+    const solicitar = window.api.solicitar;
+    const formato = window.importes.formato;
     const producto = document.getElementById("producto");
     const cantidad = document.getElementById("cantidad");
     const pago = document.getElementById("pago");
     const deudor = document.getElementById("deudor");
-    const estado = document.getElementById("estado");
     const detalle = document.getElementById("detalle");
     const mensaje = document.getElementById("mensaje-venta");
-    let actual = nuevoBorrador();
-    let modificado = false;
-    let siguienteId = 6;
+    const guardar = document.getElementById("guardar-ticket");
+    const confirmar = document.getElementById("confirmar-ticket");
+    const anular = document.getElementById("anular-ticket");
+    const nuevo = document.getElementById("nuevo-ticket");
+    let eventoId;
+    let productos = [];
+    let tickets = [];
+    let actual = null;
+    let items = [];
+    let ocupado = false;
+    let cargado = false;
 
-    function nuevoBorrador() {
-        return { id: null, items: [], pago: "Efectivo", deudor: "", detalle: "", estado: "Abierto" };
+    function nodo(tag, texto, clase) {
+        const elemento = document.createElement(tag);
+        elemento.textContent = texto;
+        if (clase) elemento.className = clase;
+        return elemento;
     }
 
-    function copiar(ticket) {
-        return { ...ticket, items: ticket.items.map(item => ({ ...item })) };
+    function error(excepcion) {
+        console.error("No se pudo completar la operación de venta:", excepcion);
+        mensaje.textContent = excepcion.message;
     }
 
-    function productoPorId(id) {
-        return productos.find(item => item.id === id);
-    }
-
-    function reservadoPorOtros(id) {
-        return tickets
-            .filter(ticket => ticket.id !== actual.id && ticket.estado !== "Cancelado")
-            .reduce((total, ticket) => total + ticket.items
-                .filter(item => item.productoId === id)
-                .reduce((suma, item) => suma + item.cantidad, 0), 0);
-    }
-
-    function disponible(id, incluirActual) {
-        const seleccionado = actual.items.find(item => item.productoId === id);
-        const reservadoActual = incluirActual && actual.estado !== "Cancelado" && seleccionado ? seleccionado.cantidad : 0;
-        return productoPorId(id).stock - reservadoPorOtros(id) - reservadoActual;
-    }
-
-    function total(ticket) {
-        return ticket.items.reduce((suma, item) => suma + productoPorId(item.productoId).precio * item.cantidad, 0);
-    }
-
-    function formato(centavos) {
-        return moneda.format(centavos / 100);
-    }
-
-    function elemento(tag, texto, clase) {
-        const nodo = document.createElement(tag);
-        nodo.textContent = texto;
-        if (clase) nodo.className = clase;
-        return nodo;
+    function controles() {
+        const editable = cargado && !ocupado && actual === null;
+        producto.disabled = !editable;
+        cantidad.disabled = !editable;
+        detalle.disabled = !editable;
+        document.getElementById("agregar-producto").disabled = !editable;
+        guardar.disabled = !editable || items.length === 0;
+        confirmar.disabled = !cargado || ocupado || !actual || actual.estado !== "abierto";
+        anular.disabled = !cargado || ocupado || !actual || actual.estado === "anulado";
+        pago.disabled = !cargado || ocupado || !actual || actual.estado !== "abierto";
+        deudor.disabled = pago.disabled;
+        nuevo.disabled = !cargado || ocupado;
     }
 
     function mostrarProductos() {
         const seleccionado = producto.value;
         producto.replaceChildren();
-        productos.forEach(item => {
-            const opcion = elemento("option", `${item.nombre} — ${formato(item.precio)}`);
-            opcion.value = item.id;
+        productos.filter(item => item.activo).forEach(item => {
+            const opcion = nodo("option", `${item.nombre} — ${formato(item.precio)}`);
+            opcion.value = String(item.id);
             producto.append(opcion);
         });
-        if (seleccionado) producto.value = seleccionado;
-        const id = Number(producto.value);
-        const restante = disponible(id, true);
-        document.getElementById("disponibilidad").textContent = restante < 0
-            ? `El ticket supera el stock de ejemplo por ${-restante} unidades. Los tickets cancelados no reservan stock.`
-            : `Stock de ejemplo disponible: ${restante}. Los tickets cancelados no reservan stock.`;
+        if (Array.from(producto.options).some(opcion => opcion.value === seleccionado)) producto.value = seleccionado;
+        const seleccionadoProducto = productos.find(item => item.id === Number(producto.value));
+        document.getElementById("disponibilidad").textContent = !seleccionadoProducto
+            ? "No hay productos activos."
+            : seleccionadoProducto.stock === null ? "Sin control de stock."
+                : `Stock disponible: ${seleccionadoProducto.stock}. Se comprueba al confirmar.`;
     }
 
     function mostrarTicket() {
-        document.getElementById("titulo-ticket").textContent = actual.id ? `Ticket de ejemplo #${actual.id}` : "Nuevo ticket";
+        document.getElementById("titulo-ticket").textContent = actual
+            ? `Ticket #${actual.id} — ${actual.estado}` : "Nuevo ticket";
         const cuerpo = document.getElementById("productos-ticket");
         cuerpo.replaceChildren();
-        if (!actual.items.length) {
+        const lineas = actual ? actual.items : items;
+        if (!lineas.length) {
             const fila = document.createElement("tr");
-            const celda = elemento("td", "Todavía no agregaste productos.", "text-muted");
+            const celda = nodo("td", "Todavía no agregaste productos.", "text-muted");
             celda.colSpan = 5;
             fila.append(celda);
             cuerpo.append(fila);
         }
-        actual.items.forEach(item => {
-            const informacion = productoPorId(item.productoId);
+        lineas.forEach(item => {
             const fila = document.createElement("tr");
-            fila.append(elemento("td", informacion.nombre));
-            fila.append(elemento("td", String(item.cantidad)));
-            fila.append(elemento("td", formato(informacion.precio)));
-            fila.append(elemento("td", formato(informacion.precio * item.cantidad)));
+            fila.append(nodo("td", item.nombre), nodo("td", String(item.cantidad)),
+                nodo("td", formato(item.precioUnitario)), nodo("td", formato(item.subtotal)));
             const accion = document.createElement("td");
-            const quitar = elemento("button", "Quitar", "btn btn-sm btn-outline-danger");
-            quitar.type = "button";
-            quitar.setAttribute("aria-label", `Quitar ${informacion.nombre}`);
-            quitar.addEventListener("click", () => {
-                actual.items = actual.items.filter(linea => linea.productoId !== item.productoId);
-                modificado = true;
-                mensaje.textContent = "";
-                mostrarTicket();
-            });
-            accion.append(quitar);
+            if (!actual) {
+                const quitar = nodo("button", "Quitar", "btn btn-sm btn-outline-danger");
+                quitar.type = "button";
+                quitar.disabled = ocupado;
+                quitar.addEventListener("click", () => {
+                    items = items.filter(linea => linea.productoId !== item.productoId);
+                    mostrarTicket();
+                });
+                accion.append(quitar);
+            }
             fila.append(accion);
             cuerpo.append(fila);
         });
-        document.getElementById("total-ticket").textContent = formato(total(actual));
-        mostrarProductos();
+        const total = actual ? actual.total : items.reduce((suma, item) => suma + item.subtotal, 0);
+        document.getElementById("total-ticket").textContent = formato(total);
+        detalle.value = actual ? actual.detalle || "" : detalle.value;
+        document.getElementById("anulacion-info").textContent = actual && actual.anulacion
+            ? `Anulado: ${actual.anulacion.motivo} (${actual.anulacion.fecha}, UTC).` +
+                (actual.anulacion.devolucionTransferenciaConfirmada ? " Devolución externa de transferencia confirmada." : "")
+            : "";
+        controles();
     }
 
     function mostrarLista() {
         const lista = document.getElementById("lista-tickets");
         lista.replaceChildren();
         tickets.forEach(ticket => {
-            const boton = document.createElement("button");
+            const boton = nodo("button", `Ticket #${ticket.id} — ${ticket.estado} — ${formato(ticket.total)}`,
+                "list-group-item list-group-item-action");
             boton.type = "button";
-            boton.className = "list-group-item list-group-item-action";
-            boton.setAttribute("aria-pressed", String(ticket.id === actual.id));
-            const titulo = elemento("span", `Ticket #${ticket.id}`, "font-weight-bold");
-            const insignia = elemento("span", ticket.estado, `badge ${colores[ticket.estado]} ml-2`);
-            const resumen = elemento("span", `${ticket.pago} · ${formato(total(ticket))}`, "d-block small mt-1");
-            boton.append(titulo, insignia, resumen);
+            boton.disabled = ocupado;
             boton.addEventListener("click", () => {
-                if (ticket.id === actual.id) return;
-                if (modificado && !window.confirm("Hay cambios sin guardar. ¿Querés descartarlos y abrir otro ticket?")) return;
-                actual = copiar(ticket);
-                modificado = false;
+                if (!actual && items.length && !window.confirm("Hay un ticket sin guardar. ¿Querés descartarlo?")) return;
+                actual = ticket;
+                items = [];
+                pago.value = ticket.metodoPago || "efectivo";
+                deudor.value = ticket.deudor || "";
+                document.getElementById("grupo-deudor").hidden = pago.value !== "deuda";
                 mensaje.textContent = "";
-                mostrarFormulario();
+                mostrarTicket();
             });
             lista.append(boton);
         });
     }
 
-    function mostrarFormulario() {
-        pago.value = actual.pago;
-        deudor.value = actual.deudor;
-        estado.value = actual.estado;
-        detalle.value = actual.detalle;
-        document.getElementById("grupo-deudor").hidden = actual.pago !== "Deuda";
-        cantidad.value = 1;
-        mostrarTicket();
+    async function recargar() {
+        [productos, tickets] = await Promise.all([
+            solicitar(`/api/productos?eventoId=${eventoId}`),
+            solicitar(`/api/tickets?eventoId=${eventoId}`)
+        ]);
+        if (actual) actual = tickets.find(ticket => ticket.id === actual.id);
+        mostrarProductos();
         mostrarLista();
+        mostrarTicket();
     }
 
     document.getElementById("agregar-producto").addEventListener("click", () => {
-        const id = Number(producto.value);
+        const seleccionado = productos.find(item => item.id === Number(producto.value) && item.activo);
         const unidades = Number(cantidad.value);
-        if (!Number.isSafeInteger(unidades) || unidades < 1) {
-            mensaje.textContent = "Ingresá una cantidad entera mayor que cero.";
+        if (!seleccionado || !Number.isSafeInteger(unidades) || unidades < 1) {
+            mensaje.textContent = "Elegí un producto e ingresá una cantidad entera mayor que cero.";
             return;
         }
-        const actualCantidad = actual.items.find(item => item.productoId === id);
-        const yaAgregadas = actualCantidad ? actualCantidad.cantidad : 0;
-        if (yaAgregadas + unidades > disponible(id, false)) {
-            mensaje.textContent = "La cantidad supera el stock de ejemplo disponible.";
+        const anterior = items.find(item => item.productoId === seleccionado.id);
+        const nuevaCantidad = (anterior ? anterior.cantidad : 0) + unidades;
+        const subtotal = nuevaCantidad * seleccionado.precio;
+        const total = items.reduce((suma, item) => suma + (item === anterior ? 0 : item.subtotal), 0) + subtotal;
+        if (!Number.isSafeInteger(nuevaCantidad) || !Number.isSafeInteger(subtotal) || !Number.isSafeInteger(total)) {
+            mensaje.textContent = "La cantidad o el total supera el máximo permitido.";
             return;
         }
-        if (actualCantidad) actualCantidad.cantidad += unidades;
-        else actual.items.push({ productoId: id, cantidad: unidades });
-        modificado = true;
+        if (anterior) {
+            anterior.cantidad = nuevaCantidad;
+            anterior.subtotal = subtotal;
+        } else {
+            items.push({ productoId: seleccionado.id, nombre: seleccionado.nombre, cantidad: unidades,
+                precioUnitario: seleccionado.precio, subtotal });
+        }
         mensaje.textContent = "";
-        cantidad.value = 1;
         mostrarTicket();
     });
 
     producto.addEventListener("change", mostrarProductos);
     pago.addEventListener("change", () => {
-        actual.pago = pago.value;
-        document.getElementById("grupo-deudor").hidden = actual.pago !== "Deuda";
-        modificado = true;
+        document.getElementById("grupo-deudor").hidden = pago.value !== "deuda";
     });
-    deudor.addEventListener("input", () => { actual.deudor = deudor.value; modificado = true; });
-    detalle.addEventListener("input", () => { actual.detalle = detalle.value; modificado = true; });
-    estado.addEventListener("change", () => { actual.estado = estado.value; modificado = true; mostrarProductos(); });
+    nuevo.addEventListener("click", () => {
+        if (!actual && items.length && !window.confirm("Hay un ticket sin guardar. ¿Querés descartarlo?")) return;
+        actual = null;
+        items = [];
+        detalle.value = "";
+        deudor.value = "";
+        pago.value = "efectivo";
+        document.getElementById("grupo-deudor").hidden = true;
+        mensaje.textContent = "";
+        mostrarTicket();
+    });
 
-    document.getElementById("nuevo-ticket").addEventListener("click", () => {
-        if (!actual.items.length) {
-            mensaje.textContent = "Agregá al menos un producto antes de guardar el ticket de ejemplo.";
-            return;
+    guardar.addEventListener("click", async () => {
+        ocupado = true;
+        controles();
+        mostrarLista();
+        try {
+            actual = await solicitar("/api/tickets", {
+                method: "POST",
+                body: JSON.stringify({ eventoId, detalle: detalle.value,
+                    items: items.map(item => ({ productoId: item.productoId, cantidad: item.cantidad })) })
+            });
+            items = [];
+            await recargar();
+            mensaje.textContent = "Ticket guardado. Confirmá la venta para descontar el stock.";
+        } catch (excepcion) {
+            error(excepcion);
+        } finally {
+            ocupado = false;
+            controles();
+            mostrarLista();
         }
-        if (actual.pago === "Deuda" && !actual.deudor.trim()) {
+    });
+
+    confirmar.addEventListener("click", async () => {
+        if (pago.value === "deuda" && !deudor.value.trim()) {
             mensaje.textContent = "Ingresá el nombre del deudor.";
             deudor.focus();
             return;
         }
-        if (actual.estado !== "Cancelado" && actual.items.some(item => item.cantidad > disponible(item.productoId, false))) {
-            mensaje.textContent = "El ticket supera el stock de ejemplo disponible. Quitá productos o cambialo a cancelado.";
-            return;
+        ocupado = true;
+        controles();
+        mostrarLista();
+        try {
+            actual = await solicitar(`/api/tickets/${actual.id}/confirmar`, {
+                method: "POST",
+                body: JSON.stringify({ metodoPago: pago.value, deudor: pago.value === "deuda" ? deudor.value.trim() : null })
+            });
+
+            await recargar();
+            mensaje.textContent = actual.estado === "deuda" ? "Deuda registrada; el cobro queda pendiente." : "Venta confirmada.";
+            window.dispatchEvent(new Event("evento-seleccionado-cambio"));
+        } catch (excepcion) {
+            error(excepcion);
+        } finally {
+            ocupado = false;
+            controles();
+            mostrarLista();
         }
-        if (actual.id === null) {
-            actual.id = siguienteId++;
-            tickets.push(copiar(actual));
-        } else {
-            const indice = tickets.findIndex(ticket => ticket.id === actual.id);
-            tickets[indice] = copiar(actual);
-        }
-        actual = nuevoBorrador();
-        modificado = false;
-        mensaje.textContent = "";
-        mostrarFormulario();
     });
 
-    mostrarFormulario();
+    anular.addEventListener("click", async () => {
+        const motivo = window.prompt("Ingresá el motivo de la anulación (máximo 500 caracteres):");
+        if (motivo === null) return;
+        if (!motivo.trim() || motivo.length > 500) {
+            mensaje.textContent = "Ingresá un motivo de hasta 500 caracteres.";
+            return;
+        }
+        let devolucionTransferenciaConfirmada = false;
+        if (actual.metodoPago === "transferencia") {
+            devolucionTransferenciaConfirmada = window.confirm(
+                "¿Confirmás que ya devolviste la transferencia fuera del sistema? La aplicación no realiza transferencias.");
+            if (!devolucionTransferenciaConfirmada) return;
+        } else if (!window.confirm("¿Querés anular este ticket? Esta acción no se puede deshacer.")) {
+            return;
+        }
+        ocupado = true;
+        controles();
+        mostrarLista();
+        try {
+            actual = await solicitar(`/api/tickets/${actual.id}/anular`, {
+                method: "POST",
+                body: JSON.stringify({ motivo: motivo.trim(), devolucionTransferenciaConfirmada })
+            });
+            await recargar();
+            mensaje.textContent = "Ticket anulado; se conserva su historial.";
+            window.dispatchEvent(new Event("evento-seleccionado-cambio"));
+        } catch (excepcion) {
+            error(excepcion);
+        } finally {
+            ocupado = false;
+            controles();
+            mostrarLista();
+        }
+    });
+
+    (async function iniciar() {
+        try {
+            const eventos = await solicitar("/api/eventos");
+            const id = Number(sessionStorage.getItem("caja.eventos.seleccionado.v1"));
+            const evento = eventos.find(item => item.id === id) || eventos[0];
+            if (!evento) throw new Error("Primero creá y seleccioná un evento.");
+            eventoId = evento.id;
+            document.getElementById("evento-venta").textContent = `Evento: ${evento.nombre}. La caja debe estar abierta para confirmar.`;
+            await recargar();
+            cargado = true;
+            controles();
+        } catch (excepcion) {
+            error(excepcion);
+        }
+    })();
 })();

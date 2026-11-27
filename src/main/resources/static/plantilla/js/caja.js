@@ -5,48 +5,13 @@
     const formCierre = document.getElementById("form-cierre");
     const error = document.getElementById("error-caja");
     const mensaje = document.getElementById("mensaje-caja");
-    const ejemplo = { efectivo: 5000000, transferencia: 1200000, deuda: 700000 };
-    let eventoId;
+    const solicitar = window.api.solicitar;
+    let eventoId = null;
+    let caja = null;
     let numeroAporte = 0;
 
-    function esImporte(valor) {
-        return Number.isSafeInteger(valor) && valor >= 0;
-    }
-
-    function sumar(...valores) {
-        const total = valores.reduce((resultado, valor) => resultado + BigInt(valor), 0n);
-        if (total > BigInt(Number.MAX_SAFE_INTEGER)) {
-            throw new Error("La suma supera el máximo permitido para la demostración.");
-        }
-        return Number(total);
-    }
-
-    function leerEvento(datos) {
-        if (datos.actualId !== eventoId) throw new Error("Cambió el evento seleccionado; recargá la página.");
-        const evento = datos.eventos.find(item => item.id === eventoId);
-        if (!evento) throw new Error("No se encontró el evento seleccionado.");
-        const gestion = evento.gestionCaja;
-        if (gestion === undefined) return evento;
-        if (!gestion || !Array.isArray(gestion.aportes) || !Array.isArray(gestion.ciclos) ||
-            !gestion.ciclos.length || !Array.isArray(gestion.historial) ||
-            gestion.aportes.some(item => typeof item.responsable !== "string" || !esImporte(item.importe)) ||
-            gestion.ciclos.some(ciclo => !esImporte(ciclo.inicial) || !esImporte(ciclo.efectivo) ||
-                !esImporte(ciclo.transferencia) || !esImporte(ciclo.deuda) ||
-                (ciclo.cierre !== null && (!ciclo.cierre || !esImporte(ciclo.cierre.esperado) ||
-                    !esImporte(ciclo.cierre.contado) || !Number.isSafeInteger(ciclo.cierre.diferencia)))) ||
-            gestion.historial.some(item => typeof item.fecha !== "string" ||
-                typeof item.accion !== "string" || typeof item.detalle !== "string")) {
-            throw new Error("Los datos de caja de demostración no son válidos.");
-        }
-        const ultimo = gestion.ciclos[gestion.ciclos.length - 1];
-        if ((evento.caja === "Abierta") !== (ultimo.cierre === null)) {
-            throw new Error("El estado de caja no coincide con su historial de demostración.");
-        }
-        return evento;
-    }
-
     function informarError(excepcion) {
-        console.error("No se pudo completar la operación de caja de demostración:", excepcion);
+        console.error("No se pudo completar la operación de caja:", excepcion);
         error.textContent = excepcion.message || "No se pudo completar la operación de caja.";
         mensaje.textContent = "";
     }
@@ -65,43 +30,38 @@
         contenedor.append(fila);
     }
 
-    function mostrar(evento) {
-        const gestion = evento.gestionCaja;
-        const ciclos = gestion ? gestion.ciclos : [];
-        const ultimo = ciclos[ciclos.length - 1];
-        document.getElementById("caja-evento").textContent = `Evento de ejemplo: ${evento.nombre} (${evento.estado})`;
-        document.getElementById("estado-caja").textContent = `Caja ${evento.caja.toLowerCase()}`;
-        document.getElementById("aviso-caja").textContent = !gestion && evento.caja === "Abierta"
-            ? "Esta caja estaba marcada como abierta en una versión anterior, sin apertura registrada. Registrá los aportes para continuar."
+    function mostrarImporte(id, valor) {
+        document.getElementById(id).textContent = valor === null ? "—" : window.importes.formato(valor);
+    }
+
+    function mostrar() {
+        const periodos = caja.periodos;
+        const ultimo = periodos[periodos.length - 1];
+        const cierre = [...periodos].reverse().find(item => item.fechaCierre !== null);
+        const sinHistorial = caja.id !== null && periodos.length === 0;
+        document.getElementById("estado-caja").textContent = `Caja ${caja.estado}`;
+        document.getElementById("aviso-caja").textContent = sinHistorial && caja.estado === "abierta"
+            ? "Esta caja tiene datos anteriores sin períodos registrados; no puede modificarse automáticamente."
             : "";
-        document.getElementById("seccion-apertura").hidden = !!gestion;
-        document.getElementById("titulo-apertura").textContent = evento.caja === "Abierta" ? "Registrar apertura inicial" : "Abrir caja";
-        document.getElementById("abrir-caja").textContent = evento.caja === "Abierta" ? "Registrar apertura inicial" : "Abrir caja";
-        document.getElementById("seccion-cierre").hidden = !gestion || evento.caja !== "Abierta";
-        document.getElementById("seccion-reapertura").hidden = !gestion || evento.caja !== "Cerrada";
+        document.getElementById("seccion-apertura").hidden = periodos.length > 0 || caja.estado === "abierta";
+        document.getElementById("seccion-cierre").hidden = !ultimo || caja.estado !== "abierta";
+        document.getElementById("seccion-reapertura").hidden = !ultimo || caja.estado !== "cerrada";
 
-        const mostrarImporte = (id, valor) => {
-            document.getElementById(id).textContent = valor === null ? "—" : window.importes.formato(valor);
-        };
-        mostrarImporte("total-aportes", gestion ? sumar(...gestion.aportes.map(item => item.importe)) : null);
-        mostrarImporte("ventas-efectivo", gestion ? sumar(...ciclos.map(item => item.efectivo)) : null);
-        mostrarImporte("ventas-transferencia", gestion ? sumar(...ciclos.map(item => item.transferencia)) : null);
-        mostrarImporte("ventas-deuda", gestion ? sumar(...ciclos.map(item => item.deuda)) : null);
-        mostrarImporte("base-caja", ultimo ? ultimo.inicial : null);
-        mostrarImporte("efectivo-esperado", ultimo ? sumar(ultimo.inicial, ultimo.efectivo) : null);
-
-        const cerrados = ciclos.filter(item => item.cierre);
-        const cierre = cerrados.length ? cerrados[cerrados.length - 1].cierre : null;
+        const aportes = periodos.length ? periodos[0].aportes : [];
+        const total = aportes.reduce((suma, aporte) => suma + BigInt(aporte.importe), 0n);
+        mostrarImporte("total-aportes", periodos.length ? total : null);
+        mostrarImporte("base-caja", ultimo ? ultimo.saldoInicial : null);
+        mostrarImporte("efectivo-esperado", caja.estado === "abierta" ? caja.saldoActual : null);
         document.getElementById("ultimo-cierre").hidden = !cierre;
         if (cierre) {
-            mostrarImporte("efectivo-contado", cierre.contado);
+            mostrarImporte("efectivo-contado", cierre.efectivoContado);
             mostrarImporte("diferencia-cierre", cierre.diferencia);
         }
 
         const listaAportes = document.getElementById("lista-aportes");
         listaAportes.replaceChildren();
-        if (!gestion || !gestion.aportes.length) filaVacia(listaAportes, "No hay aportes iniciales registrados.", 2);
-        else gestion.aportes.forEach(item => {
+        if (!aportes.length) filaVacia(listaAportes, "No hay aportes iniciales registrados.", 2);
+        else aportes.forEach(item => {
             const fila = document.createElement("tr");
             fila.append(celda(item.responsable), celda(window.importes.formato(item.importe)));
             listaAportes.append(fila);
@@ -109,12 +69,46 @@
 
         const historial = document.getElementById("historial-caja");
         historial.replaceChildren();
-        if (!gestion || !gestion.historial.length) filaVacia(historial, "No hay movimientos de caja registrados.", 3);
-        else gestion.historial.slice().reverse().forEach(item => {
-            const fila = document.createElement("tr");
-            fila.append(celda(new Date(item.fecha).toLocaleString("es-AR")), celda(item.accion), celda(item.detalle));
-            historial.append(fila);
+        if (!periodos.length) filaVacia(historial, "No hay períodos registrados.", 3);
+        else [...periodos].reverse().forEach((periodo, indice) => {
+            if (periodo.fechaCierre) {
+                const fila = document.createElement("tr");
+                fila.append(celda(new Date(`${periodo.fechaCierre}Z`).toLocaleString("es-AR")), celda("Cierre"),
+                    celda(`Esperado: ${window.importes.formato(periodo.efectivoEsperado)}; ` +
+                        `contado: ${window.importes.formato(periodo.efectivoContado)}; ` +
+                        `diferencia: ${window.importes.formato(periodo.diferencia)}.`));
+                historial.append(fila);
+            }
+            const apertura = document.createElement("tr");
+            const accion = indice === periodos.length - 1 ? "Apertura" : "Reapertura";
+            apertura.append(celda(new Date(`${periodo.fechaApertura}Z`).toLocaleString("es-AR")),
+                celda(accion), celda(`Base inicial: ${window.importes.formato(periodo.saldoInicial)}.`));
+            historial.append(apertura);
         });
+    }
+
+    function bloquear(bloqueado) {
+        document.querySelectorAll("#form-apertura input, #form-apertura button, #form-cierre input, #form-cierre button, #reabrir-caja")
+            .forEach(control => { control.disabled = bloqueado; });
+    }
+
+    async function operar(accion, datos, texto) {
+        bloquear(true);
+        try {
+            const opciones = { method: "POST" };
+            if (datos !== null) opciones.body = JSON.stringify(datos);
+            caja = await solicitar(`/api/cajas/evento/${eventoId}/${accion}`, opciones);
+            mostrar();
+            error.textContent = "";
+            mensaje.textContent = texto;
+            window.dispatchEvent(new Event("evento-seleccionado-cambio"));
+            return true;
+        } catch (excepcion) {
+            informarError(excepcion);
+            return false;
+        } finally {
+            bloquear(false);
+        }
     }
 
     document.getElementById("agregar-aporte").addEventListener("click", () => {
@@ -159,12 +153,9 @@
         campoResponsable.focus();
     });
 
-    formApertura.addEventListener("submit", accion => {
+    formApertura.addEventListener("submit", async accion => {
         accion.preventDefault();
         try {
-            const datos = window.eventosSesion.leer();
-            const evento = leerEvento(datos);
-            if (evento.gestionCaja) throw new Error("La apertura inicial ya fue registrada.");
             const aportes = Array.from(document.querySelectorAll("#aportes-formulario .form-row"), fila => {
                 const responsable = fila.querySelector(".responsable-aporte").value.trim();
                 if (!responsable) throw new Error("Ingresá el responsable de cada aporte.");
@@ -172,77 +163,44 @@
                 if (importe === 0) throw new Error("Cada aporte debe ser mayor que cero; quitá la fila si no hay aporte.");
                 return { responsable, importe };
             });
-            const inicial = sumar(...aportes.map(item => item.importe));
-            sumar(inicial, ejemplo.efectivo);
-            const fecha = new Date().toISOString();
-            const accionHistorial = evento.caja === "Abierta" ? "Registro de apertura previa" : "Apertura";
-            evento.gestionCaja = {
-                aportes,
-                ciclos: [{ inicial, ...ejemplo, cierre: null }],
-                historial: [{ fecha, accion: accionHistorial, detalle: `Aportes iniciales: ${window.importes.formato(inicial)}.` }]
-            };
-            evento.caja = "Abierta";
-            window.eventosSesion.guardar(datos);
-            document.getElementById("aportes-formulario").replaceChildren();
-            error.textContent = "";
-            mensaje.textContent = "Apertura de ejemplo registrada en esta pestaña.";
-            mostrar(evento);
+            const total = aportes.reduce((suma, aporte) => suma + BigInt(aporte.importe), 0n);
+            if (total > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error("La suma de los aportes supera el máximo permitido.");
+            if (await operar("abrir", { aportes }, "Caja abierta.")) {
+                document.getElementById("aportes-formulario").replaceChildren();
+            }
         } catch (excepcion) {
             informarError(excepcion);
         }
     });
 
-    formCierre.addEventListener("submit", accion => {
+    formCierre.addEventListener("submit", async accion => {
         accion.preventDefault();
         try {
             const contado = window.importes.leer(document.getElementById("contado").value);
-            const datos = window.eventosSesion.leer();
-            const evento = leerEvento(datos);
-            if (!evento.gestionCaja || evento.caja !== "Abierta") throw new Error("La caja no está abierta con una apertura registrada.");
-            const ciclo = evento.gestionCaja.ciclos[evento.gestionCaja.ciclos.length - 1];
-            const esperado = sumar(ciclo.inicial, ciclo.efectivo);
-            const diferencia = contado - esperado;
-            const fecha = new Date().toISOString();
-            ciclo.cierre = { esperado, contado, diferencia };
-            evento.gestionCaja.historial.push({ fecha, accion: "Cierre", detalle: `Esperado: ${window.importes.formato(esperado)}; contado: ${window.importes.formato(contado)}; diferencia: ${window.importes.formato(diferencia)}.` });
-            evento.caja = "Cerrada";
-            window.eventosSesion.guardar(datos);
-            formCierre.reset();
-            error.textContent = "";
-            mensaje.textContent = "Cierre de ejemplo registrado en esta pestaña.";
-            mostrar(evento);
+            if (await operar("cerrar", { efectivoContado: contado }, "Caja cerrada.")) formCierre.reset();
         } catch (excepcion) {
             informarError(excepcion);
         }
     });
 
-    document.getElementById("reabrir-caja").addEventListener("click", () => {
+    document.getElementById("reabrir-caja").addEventListener("click", async () => {
+        await operar("reabrir", null, "Caja reabierta.");
+    });
+
+    (async function iniciar() {
+        bloquear(true);
         try {
-            const datos = window.eventosSesion.leer();
-            const evento = leerEvento(datos);
-            if (!evento.gestionCaja || evento.caja !== "Cerrada") throw new Error("La caja no tiene un cierre para reabrir.");
-            const anterior = evento.gestionCaja.ciclos[evento.gestionCaja.ciclos.length - 1];
-            if (!anterior.cierre) throw new Error("Falta el efectivo contado del último cierre.");
-            const inicial = anterior.cierre.contado;
-            evento.gestionCaja.ciclos.push({ inicial, efectivo: 0, transferencia: 0, deuda: 0, cierre: null });
-            evento.gestionCaja.historial.push({ fecha: new Date().toISOString(), accion: "Reapertura", detalle: `Base del efectivo contado: ${window.importes.formato(inicial)}.` });
-            evento.caja = "Abierta";
-            window.eventosSesion.guardar(datos);
-            error.textContent = "";
-            mensaje.textContent = "Reapertura de ejemplo registrada en esta pestaña.";
-            mostrar(evento);
+            const eventos = await solicitar("/api/eventos");
+            const idGuardado = Number(sessionStorage.getItem("caja.eventos.seleccionado.v1"));
+            const evento = eventos.find(item => item.id === idGuardado) || eventos[0];
+            if (!evento) throw new Error("Primero creá y seleccioná un evento en la sección Eventos.");
+            eventoId = evento.id;
+            document.getElementById("caja-evento").textContent = `Evento: ${evento.nombre}`;
+            caja = await solicitar(`/api/cajas/evento/${eventoId}`);
+            mostrar();
+            bloquear(false);
         } catch (excepcion) {
             informarError(excepcion);
         }
-    });
-
-    try {
-        const datos = window.eventosSesion.leer();
-        eventoId = datos.actualId;
-        mostrar(leerEvento(datos));
-    } catch (excepcion) {
-        informarError(excepcion);
-        document.querySelectorAll("#form-apertura input, #form-apertura button, #form-cierre input, #form-cierre button, #reabrir-caja")
-            .forEach(control => { control.disabled = true; });
-    }
+    })();
 })();
